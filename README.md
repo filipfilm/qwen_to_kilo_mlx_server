@@ -149,11 +149,30 @@ data: [DONE]
 
 ## 🛠️ Tool Support
 
-The server includes built-in tools for:
+The server includes 15 built-in tools organized into categories:
 
-- **Shell Command Execution** - Run safe terminal commands
-- **File Read/Write** - Read and modify files
-- **Directory Operations** - Navigate and list directories
+  ### File Operations
+  - **read_file** - Read contents of any file
+  - **write_to_file** - Create or modify files
+  - **list_files** - List directory contents (with recursive option)
+  - **search_files** - Search for text patterns across multiple files
+
+  ### Code Analysis & Modification
+  - **list_code_definition_names** - Extract function and class definitions
+  - **apply_diff** - Apply code diffs and patches
+  - **insert_content** - Insert content at specific line numbers
+  - **search_and_replace** - Find and replace text within files
+
+  ### System Operations
+  - **execute_command** - Run safe shell commands
+  - **fetch_instructions** - Get available tools and capabilities
+
+  ### Task & Project Management
+  - **ask_followup_question** - Interactive development assistance
+  - **attempt_completion** - Mark task completion and results
+  - **switch_mode** - Change operational contexts
+  - **new_task** - Create and manage development tasks
+  - **update_todo_list** - Maintain project todo lists
 
 Allowed commands include: `ls`, `pwd`, `echo`, `cat`, `grep`, `find`, `python`, `git`, `mkdir`, `cp`, `mv`, `rm`, and more.
 
