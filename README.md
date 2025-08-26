@@ -7,7 +7,7 @@ A lightweight, high-performance server for running Qwen3-Coder models with MLX o
 - 🚀 **Full OpenAI API Compatibility** - Drop-in replacement for OpenAI's chat completions API
 - 📡 **Streaming Support** - Server-Sent Events (SSE) for real-time responses
 - 🛠️ **Tool Calling** - Built-in support for function calls and shell commands
-- ⚡ **Apple Silicon Optimized** - Leverages MLX for optimal performance on M1/M2/M3 Macs
+- ⚡ **Apple Silicon Optimized** - Leverages MLX for optimal performance on M1/M2/M3/M4 Macs
 - 🔧 **Simple Configuration** - Environment variables and sensible defaults
 - 🔒 **Request Management** - Built-in concurrency controls and rate limiting
 - 📝 **Comprehensive Logging** - Detailed logging for debugging and monitoring
@@ -21,10 +21,10 @@ A lightweight, high-performance server for running Qwen3-Coder models with MLX o
 
 ## 📋 Requirements
 
-- **Apple Silicon Mac** (M1, M2, or M3)
+- **Apple Silicon Mac** (M1, M2, M3, or M4)
 - **Python 3.8+**
 - **macOS 12.0+**
-- **16GB+ RAM recommended** for 30B models
+- **32GB+ RAM recommended** for 30B models
 
 ## 🚀 Quick Start
 
