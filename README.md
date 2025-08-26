@@ -1,4 +1,4 @@
-# Qwen3-Coder MLX Server (Simplified)
+# Qwen3-Coder MLX Server
 
 A lightweight, high-performance server for running Qwen3-Coder models with MLX on Apple Silicon. Features full OpenAI API compatibility, streaming support, and tool calling capabilities optimized for coding assistants Kilo.
 
@@ -46,7 +46,7 @@ huggingface-cli download mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2
 ### 3. Run Server
 
 ```bash
-python local_qwen_server_simplified.py
+python local_qwen_server.py
 ```
 
 The server will start on `http://localhost:8000`
@@ -68,7 +68,7 @@ export PORT="8000"
 export MAX_CONCURRENT_REQUESTS="2"
 
 # Run with custom config
-python local_qwen_server_simplified.py
+python local_qwen_server.py
 ```
 
 ### Configuration Options
@@ -220,7 +220,7 @@ The server is specifically optimized for Cursor's tool calling requirements and 
 ### Project Structure
 ```
 qwen-server/
-├── local_qwen_server_simplified.py  # Main server file
+├── local_qwen_server.py  # Main server file
 ├── README.md                        # This file
 └── requirements.txt                 # Dependencies
 ```
@@ -256,7 +256,7 @@ qwen-server/
 Enable verbose logging:
 ```bash
 export LOG_LEVEL=DEBUG
-python local_qwen_server_simplified.py
+python local_qwen_server.py
 ```
 
 ## 📊 Performance Tips
