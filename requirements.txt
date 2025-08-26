@@ -1,0 +1,20 @@
+# Qwen3-Coder MLX Server Requirements
+
+# Core ML and Model Dependencies
+mlx-lm>=0.18.0
+mlx>=0.18.0
+transformers>=4.40.0
+
+# Web Framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+pydantic>=2.0.0
+
+# Additional Dependencies
+httpx>=0.24.0
+python-multipart>=0.0.6
+
+# Optional: Development and Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
