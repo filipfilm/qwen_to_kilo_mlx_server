@@ -1,6 +1,6 @@
 # Qwen3-Coder MLX Server (Simplified)
 
-A lightweight, high-performance server for running Qwen3-Coder models with MLX on Apple Silicon. Features full OpenAI API compatibility, streaming support, and tool calling capabilities optimized for coding assistants like Cursor's Kilo.
+A lightweight, high-performance server for running Qwen3-Coder models with MLX on Apple Silicon. Features full OpenAI API compatibility, streaming support, and tool calling capabilities optimized for coding assistants Kilo.
 
 ## ✨ Features
 
