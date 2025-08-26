@@ -1,4 +1,3 @@
-```markdown
 # Qwen3-Coder MLX Server
 
 A lightweight, high-performance server for running Qwen3-Coder models with MLX on Apple Silicon. Features full OpenAI API compatibility, streaming support, and tool calling capabilities optimized for Cursor's Kilo coding assistant.
@@ -281,4 +280,3 @@ This project is open source under the MIT License. Ensure compliance with Qwen m
 ---
 
 **Note**: This server is designed for local development. For production use, consider additional security measures, authentication, and monitoring.
-```
