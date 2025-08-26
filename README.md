@@ -218,8 +218,7 @@ for line in response.iter_lines():
 qwen-server/
 ├── local_qwen_server.py     # Main server file
 ├── README.md                # This file
-├── requirements.txt         # Dependencies
-└── .env.example            # Example environment configuration
+└── requirements.txt         # Dependencies
 ```
 
 ### Testing
