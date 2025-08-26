@@ -1,49 +1,66 @@
+```markdown
 # Qwen3-Coder MLX Server
 
-A lightweight, high-performance server for running Qwen3-Coder models with MLX on Apple Silicon. Features full OpenAI API compatibility, streaming support, and tool calling capabilities optimized for coding assistants Kilo.
+A lightweight, high-performance server for running Qwen3-Coder models with MLX on Apple Silicon. Features full OpenAI API compatibility, streaming support, and tool calling capabilities optimized for Cursor's Kilo coding assistant.
 
 ## ✨ Features
 
 - 🚀 **Full OpenAI API Compatibility** - Drop-in replacement for OpenAI's chat completions API
-- 📡 **Streaming Support** - Server-Sent Events (SSE) for real-time responses
+- 📡 **Streaming Support** - Server-Sent Events (SSE) for real-time responses (required for Kilo)
 - 🛠️ **Tool Calling** - Built-in support for function calls and shell commands
 - ⚡ **Apple Silicon Optimized** - Leverages MLX for optimal performance on M1/M2/M3/M4 Macs
 - 🔧 **Simple Configuration** - Environment variables and sensible defaults
-- 🔒 **Request Management** - Built-in concurrency controls and rate limiting
+- 🔒 **Request Management** - Built-in concurrency controls and queue management
 - 📝 **Comprehensive Logging** - Detailed logging for debugging and monitoring
-
-## 🎯 Designed For
-
-- **Cursor IDE** - Specifically tested with Kilo for tool calling
-- **Code Generation** - Optimized for programming tasks and code assistance
-- **Local Development** - Run powerful AI models entirely on your machine
-- **API Development** - Standard OpenAI-compatible endpoints
 
 ## 📋 Requirements
 
 - **Apple Silicon Mac** (M1, M2, M3, or M4)
 - **Python 3.8+**
-- **macOS 12.0+**
-- **32GB+ RAM recommended** for 30B models
+- **macOS 13.0+** (for MLX compatibility)
+- **32GB+ RAM recommended** for 30B models (16GB minimum)
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Install MLX (Apple Silicon only)
 
 ```bash
-pip install mlx-lm transformers fastapi uvicorn pydantic
+# Ensure you have Xcode command line tools
+xcode-select --install
+
+# Install MLX
+pip install mlx mlx-lm
 ```
 
-### 2. Download Model
-
-Download a compatible Qwen3-Coder model (DWQ format recommended):
+### 2. Install Dependencies
 
 ```bash
-# Example: Download from Hugging Face
-huggingface-cli download mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2
+pip install -r requirements.txt
 ```
 
-### 3. Run Server
+Or install manually:
+```bash
+pip install mlx-lm>=0.18.0 transformers>=4.40.0 fastapi>=0.100.0 uvicorn[standard]>=0.20.0 pydantic>=2.0.0
+```
+
+### 3. Download Model
+
+#### Option 1: From HuggingFace Hub
+```bash
+# Create models directory
+mkdir -p ~/models
+
+# Clone the model repository
+cd ~/models
+git clone https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2
+```
+
+#### Option 2: Use existing model
+```bash
+export MODEL_PATH="/path/to/your/model"
+```
+
+### 4. Run Server
 
 ```bash
 python local_qwen_server.py
@@ -78,10 +95,24 @@ python local_qwen_server.py
 | `MODEL_PATH` | `./Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2` | Path to the model directory |
 | `HOST` | `0.0.0.0` | Server host address |
 | `PORT` | `8000` | Server port |
-| `MAX_TOKENS` | `131072` | Maximum tokens per response |
+| `MAX_TOKENS` | `131072` | Maximum tokens per response (set high to avoid truncation) |
 | `CONTEXT_WINDOW` | `131072` | Model context window size |
 | `TEMPERATURE` | `0.7` | Default sampling temperature |
 | `MAX_CONCURRENT_REQUESTS` | `2` | Maximum concurrent requests |
+
+## 🎯 Cursor/Kilo Configuration
+
+### Important: Streaming Requirement
+Kilo requires streaming responses even when not explicitly requested. This server automatically handles this requirement.
+
+### Configuration Steps:
+1. Open Cursor settings
+2. Add custom model:
+   - Name: `Qwen3-Coder Local`
+   - API URL: `http://localhost:8000`
+   - Model: `qwen3-coder-30b-dwq-local`
+   - Max tokens: `131072` (optional, prevents truncation)
+3. Test with a simple "hello world" prompt
 
 ## 🔌 API Endpoints
 
@@ -98,87 +129,36 @@ OpenAI-compatible chat completions endpoint with streaming support.
   ],
   "max_tokens": 131072,
   "temperature": 0.7,
-  "stream": false,
+  "stream": true,
   "tools": []
 }
 ```
 
-#### Response (Non-streaming)
-```json
-{
-  "id": "chatcmpl-1234567890",
-  "object": "chat.completion",
-  "created": 1234567890,
-  "model": "qwen3-coder-30b-dwq-local",
-  "choices": [{
-    "index": 0,
-    "message": {
-      "role": "assistant",
-      "content": "Hello! How can I help you today?"
-    },
-    "finish_reason": "stop"
-  }],
-  "usage": {
-    "prompt_tokens": 10,
-    "completion_tokens": 8,
-    "total_tokens": 18
-  }
-}
+#### Response (Streaming)
+```
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","choices":[{"delta":{"role":"assistant"}}]}
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","choices":[{"delta":{"content":"Hello!"}}]}
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","choices":[{"delta":{},"finish_reason":"stop"}]}
+data: [DONE]
 ```
 
 ### Model Information
 **GET** `/v1/models`
 
-List available models.
-
 ### Server Health
 **GET** `/health`
-
-Check server health and model status.
-
-### Tool Execution
-**POST** `/v1/chat/completions` (with tools)
-
-Execute shell commands and file operations through tool calls.
 
 ## 🛠️ Tool Support
 
 The server includes built-in tools for:
 
-- **Shell Command Execution** - Run terminal commands
+- **Shell Command Execution** - Run safe terminal commands
 - **File Read/Write** - Read and modify files
-- **Directory Operations** - List and navigate directories
+- **Directory Operations** - Navigate and list directories
 
-### Example Tool Call
-```python
-import requests
+Allowed commands include: `ls`, `pwd`, `echo`, `cat`, `grep`, `find`, `python`, `git`, `mkdir`, `cp`, `mv`, `rm`, and more.
 
-response = requests.post("http://localhost:8000/v1/chat/completions", json={
-    "messages": [
-        {"role": "user", "content": "List the files in the current directory"}
-    ],
-    "tools": [
-        {
-            "type": "function",
-            "function": {
-                "name": "execute_shell_command",
-                "description": "Execute a shell command",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "command": {"type": "string"}
-                    },
-                    "required": ["command"]
-                }
-            }
-        }
-    ]
-})
-```
-
-## 📡 Streaming Support
-
-Enable real-time streaming responses:
+## 📡 Streaming Example
 
 ```python
 import requests
@@ -205,55 +185,66 @@ for line in response.iter_lines():
                     print(content, end='')
 ```
 
-## 🎯 Cursor Integration
+## ⚠️ Known Limitations
 
-For Cursor IDE users, configure your Kilo settings:
-
-1. Set server URL: `http://localhost:8000`
-2. Model: `qwen3-coder-30b-dwq-local`
-3. Enable streaming for best experience
-
-The server is specifically optimized for Cursor's tool calling requirements and response format expectations.
+- **Large Diffs**: Due to token generation limits, very large diffs (100+ lines) may get truncated. Use `write_to_file` tool for major refactors instead of `apply_diff`.
+- **Memory Usage**: 30B models require ~20GB RAM minimum, 32GB+ recommended
+- **Generation Speed**: Large responses (8k+ tokens) may take 30-60 seconds
+- **MLX Compatibility**: Requires macOS 13.0+ and Apple Silicon
+- **Streaming Only**: Some clients (like Kilo) require streaming even for non-streaming requests
 
 ## 🔧 Development
 
 ### Project Structure
 ```
 qwen-server/
-├── local_qwen_server.py  # Main server file
-├── README.md                        # This file
-└── requirements.txt                 # Dependencies
+├── local_qwen_server.py     # Main server file
+├── README.md                # This file
+├── requirements.txt         # Dependencies
+└── .env.example            # Example environment configuration
 ```
 
-### Key Components
+### Testing
 
-- **Model Loading** - MLX-optimized model initialization
-- **Request Processing** - Concurrent request handling with queue management
-- **Tool System** - Function call detection and execution
-- **Streaming Engine** - Server-Sent Events implementation
-- **Response Formatting** - OpenAI API compatibility layer
+```bash
+# Test the server
+curl http://localhost:8000/health
+
+# Test chat completion
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Hello"}],"stream":true}'
+```
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
 1. **Model Loading Errors**
-   - Verify model path is correct
-   - Ensure sufficient RAM (16GB+ recommended)
-   - Check MLX compatibility
+   ```
+   Solution: Verify model path exists and contains config.json
+   Check: ls -la $MODEL_PATH
+   ```
 
-2. **Tool Calls Not Working**
-   - Verify tool definitions in request
-   - Check server logs for execution errors
-   - Ensure proper permissions for shell commands
+2. **Kilo Shows "No assistant messages"**
+   ```
+   Solution: Server requires streaming - this is handled automatically
+   Check: Server logs should show "Streaming response requested"
+   ```
 
-3. **Streaming Issues**
-   - Confirm `stream: true` in request
-   - Check client SSE parsing
-   - Verify network connectivity
+3. **Out of Memory**
+   ```
+   Solution: Reduce MAX_CONCURRENT_REQUESTS to 1
+   Consider: Using smaller quantized models (4-bit recommended)
+   ```
+
+4. **Tool Calls Not Working**
+   ```
+   Check: Server logs for tool detection
+   Verify: Tool definitions in request payload
+   ```
 
 ### Debug Mode
-Enable verbose logging:
 ```bash
 export LOG_LEVEL=DEBUG
 python local_qwen_server.py
@@ -261,32 +252,33 @@ python local_qwen_server.py
 
 ## 📊 Performance Tips
 
-- **Memory Management** - Automatic garbage collection after requests
-- **Concurrency** - Adjust `MAX_CONCURRENT_REQUESTS` based on available RAM
-- **Model Size** - Use quantized models (4-bit DWQ) for better performance
-- **Temperature** - Lower values (0.1-0.3) for code generation, higher (0.7-1.0) for creative tasks
+- **Quantization**: Use 4-bit quantized models for better memory efficiency
+- **Batch Size**: Keep `MAX_CONCURRENT_REQUESTS` at 1-2 for stability
+- **Temperature**: Use 0.1-0.3 for code generation, 0.7-1.0 for creative tasks
+- **Context**: Monitor context usage to avoid hitting limits
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for:
+Contributions are welcome! Areas for improvement:
 
-- Bug fixes
-- Performance improvements
-- New tool implementations
-- Documentation updates
-- Model compatibility enhancements
+- Additional tool implementations
+- Response caching
+- Model switching without restart
+- Multi-user session management
+- Prometheus metrics integration
 
 ## 📄 License
 
-This project is open source. Please ensure compliance with the Qwen model license terms.
+This project is open source under the MIT License. Ensure compliance with Qwen model license terms.
 
 ## 🙏 Acknowledgments
 
-- **MLX Team** - For the excellent Apple Silicon ML framework
-- **Qwen Team** - For the powerful coding models
-- **FastAPI** - For the robust web framework
-- **OpenAI** - For the API standard
+- **MLX Team** - Apple Silicon ML framework
+- **Qwen Team** - Powerful coding models
+- **Cursor/Kilo** - Excellent AI coding assistant
+- **FastAPI** - Modern web framework
 
 ---
 
-**Note**: This server is designed for local development and testing. For production use, consider additional security measures, rate limiting, and monitoring.
+**Note**: This server is designed for local development. For production use, consider additional security measures, authentication, and monitoring.
+```

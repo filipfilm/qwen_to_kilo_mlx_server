@@ -14,7 +14,7 @@ Features:
 - Concurrent request handling with queue management
 - Comprehensive logging and error handling
 
-Author: Your Name
+Author: Filip Dobosz
 License: Open Source
 """
 # local_qwen_server_simplified.py
@@ -394,7 +394,7 @@ def load_model():
                 logger.info(f"Resolved model path to: {model_path}")
             else:
                 # Try looking in the original models directory
-                fallback_path = f"{os.path.expanduser('~')}/Documents/models/{model_path.lstrip('./')}"
+                fallback_path = os.path.join(os.path.expanduser('~'), 'models', model_path.lstrip('./'))
                 if os.path.exists(fallback_path):
                     model_path = fallback_path
                     logger.info(f"Found model in fallback location: {model_path}")
